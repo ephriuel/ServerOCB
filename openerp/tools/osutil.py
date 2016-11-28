@@ -67,7 +67,9 @@ def walksymlinks(top, topdown=True, onerror=None):
 
 @contextmanager
 def tempdir():
+    # ALIAMOD: cambio de directorio /tmp por estar con espacio insuficiente
     tmpdir = tempfile.mkdtemp()
+    tmpdir = tmpdir.replace("tmp","opt/tmp",1)
     try:
         yield tmpdir
     finally:
