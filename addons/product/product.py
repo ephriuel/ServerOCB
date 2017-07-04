@@ -192,13 +192,18 @@ class product_uom(osv.osv):
         return amount
 
     def _compute_price(self, cr, uid, from_uom_id, price, to_uom_id=False):
+        print "Amount Price"
+        print price
         if (not from_uom_id or not price or not to_uom_id
                 or (to_uom_id == from_uom_id)):
             return price
         from_unit, to_unit = self.browse(cr, uid, [from_uom_id, to_uom_id])
         if from_unit.category_id.id != to_unit.category_id.id:
             return price
+        print "Unit Factor"
+        print price
         amount = price * from_unit.factor
+        print amount
         if to_uom_id:
             amount = amount / to_unit.factor
         return amount
@@ -641,7 +646,6 @@ class product_template(osv.osv):
                 # This is right cause a field cannot be in more than one currency
                 res[product.id] = self.pool.get('res.currency').compute(cr, uid, price_type_currency_id,
                     context['currency_id'], res[product.id],context=context)
-
         return res
 
     def _get_uom_id(self, cr, uid, *args):

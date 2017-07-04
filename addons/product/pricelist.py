@@ -302,9 +302,10 @@ class product_pricelist(osv.osv):
                                 qty, partner)], context=context)[product.id]
                         ptype_src = rule.base_pricelist_id.currency_id.id
                         price_uom_id = qty_uom_id
+                        print "rulebase-1"                        
                         price = currency_obj.compute(cr, uid,
                                 ptype_src, pricelist.currency_id.id,
-                                price_tmp, round=False,
+                                price_tmp, round=True,
                                 context=context)
                 elif rule.base == -2:
                     seller = False
@@ -335,7 +336,7 @@ class product_pricelist(osv.osv):
                             cr, uid,
                             price_type.currency_id.id, pricelist.currency_id.id,
                             product_obj._price_get(cr, uid, [product], price_type.field, context=context)[product.id],
-                            round=False, context=context)
+                            round=True, context=context)
 
                 if price is not False:
                     price_limit = price

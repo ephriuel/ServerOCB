@@ -3385,6 +3385,9 @@ class BaseModel(object):
         fetched = self.browse(ids)
         missing = self - fetched
         if missing:
+#             print self
+#             print fetched
+#             print ids
             extras = fetched - self
             if extras:
                 raise AccessError(
@@ -3496,7 +3499,7 @@ class BaseModel(object):
                     return
                 _logger.warning('Failed operation on deleted record(s): %s, uid: %s, model: %s', operation, uid, self._name)
                 raise MissingError(
-                    _('One of the documents you are trying to access has been deleted, please try again after refreshing.'))
+                    _('One of the LOXO documents you are trying to access has been deleted, please try again after refreshing.'))
 
 
     def check_access_rights(self, cr, uid, operation, raise_exception=True): # no context on purpose.

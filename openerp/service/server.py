@@ -348,6 +348,17 @@ class ThreadedServer(CommonServer):
         _logger.debug('--')
         openerp.modules.registry.RegistryManager.delete_all()
         logging.shutdown()
+        
+    def connect_managers(self):
+        from openerp.modules.registry import RegistryManager
+        from openerp.api import Environment
+ 
+        r = RegistryManager.get(config.options.get('db_bootstrap_name'))
+        cr = r.cursor()
+        Environment.reset()
+        env = Environment(cr, openerp.SUPERUSER_ID, context={}) 
+        _logger.info('===> connect_all_managers <===')
+        env['weighing.scale.manager'].communication_start_all()
 
     def run(self, preload=None, stop=False):
         """ Start the http server and the cron thread then wait for a signal.
@@ -356,9 +367,11 @@ class ThreadedServer(CommonServer):
         a second one if any will force an immediate exit.
         """
         self.start(stop=stop)
-
         rc = preload_registries(preload)
-
+        
+        if config.options.get('connect_managers') and config.options.get('db_bootstrap_name'):
+            self.connect_managers()
+    
         if stop:
             self.stop()
             return rc
