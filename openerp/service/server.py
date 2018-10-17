@@ -349,16 +349,28 @@ class ThreadedServer(CommonServer):
         openerp.modules.registry.RegistryManager.delete_all()
         logging.shutdown()
         
-    def connect_managers(self):
+    def create_connection(self):
         from openerp.modules.registry import RegistryManager
-        from openerp.api import Environment
- 
         r = RegistryManager.get(config.options.get('db_bootstrap_name'))
         cr = r.cursor()
+        return cr
+
+    def connect_managers(self, cr):
+        from openerp.api import Environment
         Environment.reset()
         env = Environment(cr, openerp.SUPERUSER_ID, context={}) 
         _logger.info('===> connect_all_managers <===')
         env['weighing.scale.manager'].communication_start_all()
+
+    def force_cron_run(self, cr):
+        from openerp.api import Environment
+        Environment.reset()
+        env = Environment(cr, openerp.SUPERUSER_ID, context={})
+        _logger.info('===> force_cron_run <===')
+        try:
+            env['weighing.scale.manager'].handle_managers_job()
+        except:
+            _logger.error('===>>> EXCEPTION in "force_cron_run" execution (see "handle_managers_job method" for more info)')
 
     def run(self, preload=None, stop=False):
         """ Start the http server and the cron thread then wait for a signal.
@@ -368,9 +380,13 @@ class ThreadedServer(CommonServer):
         """
         self.start(stop=stop)
         rc = preload_registries(preload)
-        
-        if config.options.get('connect_managers') and config.options.get('db_bootstrap_name'):
-            self.connect_managers()
+
+        if config.options.get('db_bootstrap_name'):
+            cr = self.create_connection()
+            if config.options.get('connect_managers'):
+                self.connect_managers(cr)
+            if config.options.get('force_cron_run'):
+                self.force_cron_run(cr)
     
         if stop:
             self.stop()
